@@ -9,10 +9,78 @@
 				"anonymous": false,
 				"inputs": [
 					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "id",
+						"type": "bytes32"
+					},
+					{
 						"indexed": false,
 						"internalType": "string",
-						"name": "id",
+						"name": "codebar",
 						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "author",
+						"type": "address"
+					}
+				],
+				"name": "ProductAdded",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "id",
+						"type": "bytes32"
+					},
+					{
+						"indexed": false,
+						"internalType": "enum Traceability.State",
+						"name": "state",
+						"type": "uint8"
+					}
+				],
+				"name": "ProductStateChanged",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "productId",
+						"type": "bytes32"
+					},
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "traceId",
+						"type": "bytes32"
 					},
 					{
 						"indexed": false,
@@ -45,6 +113,34 @@
 					},
 					{
 						"internalType": "string",
+						"name": "_codebar",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "_name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "_description",
+						"type": "string"
+					}
+				],
+				"name": "addProduct",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_productId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "string",
 						"name": "_description",
 						"type": "string"
 					}
@@ -55,59 +151,13 @@
 				"type": "function"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "_index",
-						"type": "uint256"
-					}
-				],
-				"name": "getTrace",
-				"outputs": [
-					{
-						"components": [
-							{
-								"internalType": "string",
-								"name": "id",
-								"type": "string"
-							},
-							{
-								"internalType": "string",
-								"name": "description",
-								"type": "string"
-							},
-							{
-								"internalType": "uint256",
-								"name": "timestamp",
-								"type": "uint256"
-							},
-							{
-								"internalType": "address",
-								"name": "author",
-								"type": "address"
-							},
-							{
-								"internalType": "enum Traceability.State",
-								"name": "state",
-								"type": "uint8"
-							}
-						],
-						"internalType": "struct Traceability.Trace",
-						"name": "",
-						"type": "tuple"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [],
-				"name": "getTraceCount",
+				"name": "getAllProductIds",
 				"outputs": [
 					{
-						"internalType": "uint256",
+						"internalType": "bytes32[]",
 						"name": "",
-						"type": "uint256"
+						"type": "bytes32[]"
 					}
 				],
 				"stateMutability": "view",
@@ -115,20 +165,64 @@
 			},
 			{
 				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_productId",
+						"type": "bytes32"
+					}
+				],
+				"name": "getProduct",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "codebar",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
 					{
 						"internalType": "address",
-						"name": "_author",
+						"name": "author",
 						"type": "address"
+					},
+					{
+						"internalType": "enum Traceability.State",
+						"name": "state",
+						"type": "uint8"
 					}
 				],
-				"name": "getTracesByAuthor",
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_productId",
+						"type": "bytes32"
+					}
+				],
+				"name": "getProductTraces",
 				"outputs": [
 					{
 						"components": [
 							{
-								"internalType": "string",
+								"internalType": "bytes32",
 								"name": "id",
-								"type": "string"
+								"type": "bytes32"
 							},
 							{
 								"internalType": "string",
@@ -162,40 +256,70 @@
 			{
 				"inputs": [
 					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"name": "traces",
-				"outputs": [
-					{
-						"internalType": "string",
-						"name": "id",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "description",
-						"type": "string"
-					},
-					{
-						"internalType": "uint256",
-						"name": "timestamp",
-						"type": "uint256"
+						"internalType": "bytes32",
+						"name": "_productId",
+						"type": "bytes32"
 					},
 					{
 						"internalType": "address",
-						"name": "author",
+						"name": "_author",
 						"type": "address"
-					},
+					}
+				],
+				"name": "getProductTracesByAuthor",
+				"outputs": [
 					{
-						"internalType": "enum Traceability.State",
-						"name": "state",
-						"type": "uint8"
+						"components": [
+							{
+								"internalType": "bytes32",
+								"name": "id",
+								"type": "bytes32"
+							},
+							{
+								"internalType": "string",
+								"name": "description",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "timestamp",
+								"type": "uint256"
+							},
+							{
+								"internalType": "address",
+								"name": "author",
+								"type": "address"
+							},
+							{
+								"internalType": "enum Traceability.State",
+								"name": "state",
+								"type": "uint8"
+							}
+						],
+						"internalType": "struct Traceability.Trace[]",
+						"name": "",
+						"type": "tuple[]"
 					}
 				],
 				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_productId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "enum Traceability.State",
+						"name": "_state",
+						"type": "uint8"
+					}
+				],
+				"name": "setProductState",
+				"outputs": [],
+				"stateMutability": "nonpayable",
 				"type": "function"
 			}
 		],
@@ -212,7 +336,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/Traceability.sol": "Traceability"
+			"contracts/trace.sol": "Traceability"
 		},
 		"evmVersion": "cancun",
 		"libraries": {},
@@ -226,12 +350,12 @@
 		"remappings": []
 	},
 	"sources": {
-		"contracts/Traceability.sol": {
-			"keccak256": "0x036e4a7bbf01724ccd4b992c520be6bf8342e9e5ef635b70a24f1ac9d0371725",
+		"contracts/trace.sol": {
+			"keccak256": "0x21c0289fd7df095d5d81e2675b050af60d6cfaa9dbd3080a93c1af2446df1e06",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://0ba4e0c49a996635785b38d32861d74d7911fb31434f1146da5377479b7ecd9b",
-				"dweb:/ipfs/QmSQ5RzeccsiFTLGHLWQZ5AxQzVoyQPngPxgqqQeCmpA6g"
+				"bzz-raw://705035ca6ce21c7a4ee8e682258970ac37e7ed5d1f7c4915a18eaec44461d9b1",
+				"dweb:/ipfs/QmbyKX8R5S57rhwomjBFPhB4VL9niRtsAHDJQT1CEn7C8o"
 			]
 		}
 	},

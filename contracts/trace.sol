@@ -1,34 +1,59 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
 
 contract Traceability {
-
-    enum State {Active, Inactive}
+    enum State { Active, Inactive }
 
     struct Trace {
-        string id;
+        bytes32 id;
         string description;
         uint256 timestamp;
-        address author; 
+        address author;
         State state;
     }
 
     struct Product {
-        string id;
+        bytes32 id;
         string codebar;
         string name;
         string description;
         uint256 timestamp;
         address author;
-        Trace[] traces;
         State state;
+        bool exists;
     }
 
-    mapping(string => Product[]) productHistory;
+    // Changed storage structure to separate products and traces
+    mapping(bytes32 => Product) private products;
+    mapping(bytes32 => Trace[]) private productTraces;
+    bytes32[] private productIds;
 
-    event TraceAdded(string id, string description, uint256 timestamp, address author);
-    event ProductAdded(string id, string codebar, string name, string description, uint256 timestamp, address author);
+    // Events
+    event TraceAdded(bytes32 indexed productId, bytes32 indexed traceId, string description, uint256 timestamp, address author);
+    event ProductAdded(bytes32 indexed id, string codebar, string name, string description, uint256 timestamp, address author);
+    event ProductStateChanged(bytes32 indexed id, State state);
+
+    // Modifiers
+    modifier productExists(bytes32 _productId) {
+        require(products[_productId].exists, "Product does not exist");
+        _;
+    }
+
+    modifier productActive(bytes32 _productId) {
+        require(products[_productId].state == State.Active, "Product not active");
+        _;
+    }
+
+    // Helper function to convert string to bytes32
+    function stringToBytes32(string memory source) private pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
 
     function addProduct(
         string memory _id,
@@ -40,48 +65,135 @@ contract Traceability {
         require(bytes(_codebar).length > 0, "Codebar cannot be empty");
         require(bytes(_name).length > 0, "Name cannot be empty");
         require(bytes(_description).length > 0, "Description cannot be empty");
-        require(productHistory[_id] == null, "Product ID already exists");
         
-        Product memory _product = Product(_id, _codebar, _name, _description, block.timestamp, msg.sender, [], State.Active);
-        productHistory[_id] = [_product];
-        emit ProductAdded(_id, _codebar, _name, _description, block.timestamp, msg.sender);
+        bytes32 productId = stringToBytes32(_id);
+        require(!products[productId].exists, "Product already exists");
+
+        // Create product without traces array
+        Product memory newProduct = Product(
+            productId,
+            _codebar,
+            _name,
+            _description,
+            block.timestamp,
+            msg.sender,
+            State.Active,
+            true
+        );
+
+        // Store the product
+        products[productId] = newProduct;
+        productIds.push(productId);
+
+        // Create and store initial trace
+        bytes32 traceId = keccak256(abi.encodePacked(productId, block.timestamp, "INIT"));
+        Trace memory initTrace = Trace(
+            traceId,
+            "Product initialization",
+            block.timestamp,
+            msg.sender,
+            State.Active
+        );
+        
+        productTraces[productId].push(initTrace);
+
+        emit ProductAdded(productId, _codebar, _name, _description, block.timestamp, msg.sender);
+        emit TraceAdded(productId, traceId, "Product initialization", block.timestamp, msg.sender);
     }
 
-    function addTrace(string memory _productId, string memory _description) public {
-        require(bytes(_productId).length > 0, "Product ID cannot be empty");
+    function addTrace(bytes32 _productId, string memory _description) 
+        public 
+        productExists(_productId)
+        productActive(_productId)
+    {
         require(bytes(_description).length > 0, "Trace description cannot be empty");
-        require(products[_productId].state == State.Active, "Product not active");
 
-        string memory _id = "TRC-" + (traces.length + 1).toString();
-        traces.push(Trace(_id, _description, block.timestamp, msg.sender, State.Active));
-        emit TraceAdded(_id, _description, block.timestamp, msg.sender);
+        bytes32 traceId = keccak256(abi.encodePacked(_productId, block.timestamp, msg.sender, _description));
+        Trace memory newTrace = Trace(
+            traceId,
+            _description,
+            block.timestamp,
+            msg.sender,
+            State.Active
+        );
+
+        productTraces[_productId].push(newTrace);
+        emit TraceAdded(_productId, traceId, _description, block.timestamp, msg.sender);
     }
 
-    function getTrace(uint256 _productId, uint256 _index) public view returns (Trace memory) {
-        require(products[_productId].state == State.Active, "Product not active");
-        require(_index < products[_productId].traces.length, "Trace index out of bounds");
-        return products[_productId].traces[_index];
+    function getProductTraces(bytes32 _productId) 
+        public 
+        view 
+        productExists(_productId)
+        returns (Trace[] memory) 
+    {
+        return productTraces[_productId];
     }
 
-    function getTracesByProduct(uint256 _productId) public view returns (Trace[] memory) {
-        require(products[_productId].state == State.Active, "Product not active");
-        return products[_productId].traces;
-    }
-
-    function getTracesByAuthor(address _author) public view returns (Trace[] memory) {
-        Trace[] memory filteredTraces = new Trace[](traces.length);
+    function getProductTracesByAuthor(bytes32 _productId, address _author) 
+        public 
+        view 
+        productExists(_productId)
+        returns (Trace[] memory) 
+    {
+        Trace[] storage allTraces = productTraces[_productId];
         uint256 count = 0;
-        for (uint256 i = 0; i < traces.length; i++) {
-            if (traces[i].author == _author) {
-                filteredTraces[count] = traces[i];
+
+        // First count matching traces
+        for (uint256 i = 0; i < allTraces.length; i++) {
+            if (allTraces[i].author == _author) {
                 count++;
             }
         }
 
+        // Create result array with exact size
         Trace[] memory result = new Trace[](count);
-        for (uint256 i = 0; i < count; i++) {
-            result[i] = filteredTraces[i];
+        uint256 resultIndex = 0;
+
+        // Fill result array
+        for (uint256 i = 0; i < allTraces.length; i++) {
+            if (allTraces[i].author == _author) {
+                result[resultIndex] = allTraces[i];
+                resultIndex++;
+            }
         }
+
         return result;
+    }
+
+    function setProductState(bytes32 _productId, State _state) 
+        public 
+        productExists(_productId)
+    {
+        products[_productId].state = _state;
+        emit ProductStateChanged(_productId, _state);
+    }
+
+    function getProduct(bytes32 _productId) 
+        public 
+        view 
+        productExists(_productId)
+        returns (
+            string memory codebar,
+            string memory name,
+            string memory description,
+            uint256 timestamp,
+            address author,
+            State state
+        ) 
+    {
+        Product memory product = products[_productId];
+        return (
+            product.codebar,
+            product.name,
+            product.description,
+            product.timestamp,
+            product.author,
+            product.state
+        );
+    }
+
+    function getAllProductIds() public view returns (bytes32[] memory) {
+        return productIds;
     }
 }
