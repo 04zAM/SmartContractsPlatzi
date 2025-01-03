@@ -308,6 +308,45 @@
 				"inputs": [
 					{
 						"internalType": "bytes32",
+						"name": "_traceId",
+						"type": "bytes32"
+					}
+				],
+				"name": "getTraceById",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "productId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "author",
+						"type": "address"
+					},
+					{
+						"internalType": "enum Traceability.State",
+						"name": "state",
+						"type": "uint8"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
 						"name": "_productId",
 						"type": "bytes32"
 					},
@@ -351,11 +390,11 @@
 	},
 	"sources": {
 		"contracts/trace.sol": {
-			"keccak256": "0x21c0289fd7df095d5d81e2675b050af60d6cfaa9dbd3080a93c1af2446df1e06",
+			"keccak256": "0xa973d6a9abe53eae626f4f6c23ddcb7114856204d225f5eccdd176dc1ac5e33e",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://705035ca6ce21c7a4ee8e682258970ac37e7ed5d1f7c4915a18eaec44461d9b1",
-				"dweb:/ipfs/QmbyKX8R5S57rhwomjBFPhB4VL9niRtsAHDJQT1CEn7C8o"
+				"bzz-raw://4567115e6be3215d5c331d38877d89a5abc68ffd5ad398f4a9a54fb8b57d3577",
+				"dweb:/ipfs/Qme8XREzFQSFT33bD9NF6k3QcGhHE2NhfJdbDoFLkfJ6Bp"
 			]
 		}
 	},

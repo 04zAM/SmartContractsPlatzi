@@ -26,6 +26,7 @@ contract Traceability {
     // Changed storage structure to separate products and traces
     mapping(bytes32 => Product) private products;
     mapping(bytes32 => Trace[]) private productTraces;
+    mapping(bytes32 => bytes32) private traceToProduct;
     bytes32[] private productIds;
 
     // Events
@@ -96,6 +97,7 @@ contract Traceability {
         );
         
         productTraces[productId].push(initTrace);
+        traceToProduct[traceId] = productId;
 
         emit ProductAdded(productId, _codebar, _name, _description, block.timestamp, msg.sender);
         emit TraceAdded(productId, traceId, "Product initialization", block.timestamp, msg.sender);
@@ -118,6 +120,7 @@ contract Traceability {
         );
 
         productTraces[_productId].push(newTrace);
+        traceToProduct[traceId] = _productId;
         emit TraceAdded(_productId, traceId, _description, block.timestamp, msg.sender);
     }
 
@@ -191,6 +194,35 @@ contract Traceability {
             product.author,
             product.state
         );
+    }
+
+    function getTraceById(bytes32 _traceId) 
+        public 
+        view 
+        returns (
+            bytes32 productId,
+            string memory description,
+            uint256 timestamp,
+            address author,
+            State state
+        ) 
+    {
+        bytes32 productIdFound = traceToProduct[_traceId];
+        require(productIdFound != bytes32(0), "Trace not found");
+
+        Trace[] storage traces = productTraces[productIdFound];
+        for (uint256 i = 0; i < traces.length; i++) {
+            if (traces[i].id == _traceId) {
+                return (
+                    productIdFound,
+                    traces[i].description,
+                    traces[i].timestamp,
+                    traces[i].author,
+                    traces[i].state
+                );
+            }
+        }
+        revert("Trace not found");
     }
 
     function getAllProductIds() public view returns (bytes32[] memory) {
