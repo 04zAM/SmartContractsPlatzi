@@ -27,6 +27,7 @@ contract Traceability {
     mapping(bytes32 => Product) private products;
     mapping(bytes32 => Trace[]) private productTraces;
     mapping(bytes32 => bytes32) private traceToProduct;
+    mapping(string => bytes32[]) private codebarToProducts;
     bytes32[] private productIds;
 
     // Events
@@ -85,6 +86,7 @@ contract Traceability {
         // Store the product
         products[productId] = newProduct;
         productIds.push(productId);
+        codebarToProducts[_codebar].push(productId);
 
         // Create and store initial trace
         bytes32 traceId = keccak256(abi.encodePacked(productId, block.timestamp, "INIT"));
@@ -223,6 +225,59 @@ contract Traceability {
             }
         }
         revert("Trace not found");
+    }
+
+     function getProductsByCodebar(string memory _codebar) 
+        public 
+        view 
+        returns (
+            bytes32[] memory productIdsByCodebar,
+            string[] memory names,
+            string[] memory descriptions,
+            uint256[] memory timestamps,
+            address[] memory authors,
+            State[] memory states
+        ) 
+    {
+        require(bytes(_codebar).length > 0, "Codebar cannot be empty");
+        
+        bytes32[] memory matchingIds = codebarToProducts[_codebar];
+        require(matchingIds.length > 0, "No products found with this codebar");
+
+        // Initialize arrays with the correct size
+        names = new string[](matchingIds.length);
+        descriptions = new string[](matchingIds.length);
+        timestamps = new uint256[](matchingIds.length);
+        authors = new address[](matchingIds.length);
+        states = new State[](matchingIds.length);
+
+        // Fill arrays with product data
+        for (uint256 i = 0; i < matchingIds.length; i++) {
+            Product memory product = products[matchingIds[i]];
+            names[i] = product.name;
+            descriptions[i] = product.description;
+            timestamps[i] = product.timestamp;
+            authors[i] = product.author;
+            states[i] = product.state;
+        }
+
+        return (matchingIds, names, descriptions, timestamps, authors, states);
+    }
+
+    function hasProductsWithCodebar(string memory _codebar) 
+        public 
+        view 
+        returns (bool) 
+    {
+        return codebarToProducts[_codebar].length > 0;
+    }
+
+    function getProductCountByCodebar(string memory _codebar) 
+        public 
+        view 
+        returns (uint256) 
+    {
+        return codebarToProducts[_codebar].length;
     }
 
     function getAllProductIds() public view returns (bytes32[] memory) {

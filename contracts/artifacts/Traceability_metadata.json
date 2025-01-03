@@ -210,6 +210,25 @@
 			{
 				"inputs": [
 					{
+						"internalType": "string",
+						"name": "_codebar",
+						"type": "string"
+					}
+				],
+				"name": "getProductCountByCodebar",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "bytes32",
 						"name": "_productId",
 						"type": "bytes32"
@@ -307,6 +326,50 @@
 			{
 				"inputs": [
 					{
+						"internalType": "string",
+						"name": "_codebar",
+						"type": "string"
+					}
+				],
+				"name": "getProductsByCodebar",
+				"outputs": [
+					{
+						"internalType": "bytes32[]",
+						"name": "productIdsByCodebar",
+						"type": "bytes32[]"
+					},
+					{
+						"internalType": "string[]",
+						"name": "names",
+						"type": "string[]"
+					},
+					{
+						"internalType": "string[]",
+						"name": "descriptions",
+						"type": "string[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "timestamps",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "address[]",
+						"name": "authors",
+						"type": "address[]"
+					},
+					{
+						"internalType": "enum Traceability.State[]",
+						"name": "states",
+						"type": "uint8[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "bytes32",
 						"name": "_traceId",
 						"type": "bytes32"
@@ -338,6 +401,25 @@
 						"internalType": "enum Traceability.State",
 						"name": "state",
 						"type": "uint8"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "_codebar",
+						"type": "string"
+					}
+				],
+				"name": "hasProductsWithCodebar",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
 					}
 				],
 				"stateMutability": "view",
@@ -390,11 +472,11 @@
 	},
 	"sources": {
 		"contracts/trace.sol": {
-			"keccak256": "0xa973d6a9abe53eae626f4f6c23ddcb7114856204d225f5eccdd176dc1ac5e33e",
+			"keccak256": "0xfb75a11916a2177f34b48a19e2e5c885495945ef657f10847a993a9f4f1d17a2",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://4567115e6be3215d5c331d38877d89a5abc68ffd5ad398f4a9a54fb8b57d3577",
-				"dweb:/ipfs/Qme8XREzFQSFT33bD9NF6k3QcGhHE2NhfJdbDoFLkfJ6Bp"
+				"bzz-raw://932f22b6f67ad59e7046ddb4d40305ef68d3452d35c63153ea39dae835a8ede7",
+				"dweb:/ipfs/QmZ8QrdPDCzUiKei9bmEyiFaq6ZGoQVAnzssrjdMjpsKVJ"
 			]
 		}
 	},
